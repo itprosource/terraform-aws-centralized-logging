@@ -69,7 +69,7 @@ resource "aws_instance" "jumpbox" {
   subnet_id = element(aws_subnet.es_public_subnet.*.id,count.index)
 
   tags = {
-    Name = "cl_bastion-${random_string.random.id}"
+    Name = "cl_bastion-${var.domain_name}"
   }
 
 }

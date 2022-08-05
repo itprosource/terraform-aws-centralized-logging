@@ -296,6 +296,9 @@ EOF
     dedicated_master_type = var.dedicated_master_type
     instance_count = var.instance_count
     instance_type = var.instance_type
+    warm_count = var.warm_count
+    warm_enabled = var.warm_enabled
+    warm_type = var.warm_type
 
     zone_awareness_config {
       availability_zone_count = var.availability_zone_count

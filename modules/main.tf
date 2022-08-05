@@ -6,7 +6,7 @@ module "centralized_logging" {
   source = "../"
 
   # Opensearch Domain
-  domain_name = "testdomain"
+  domain_name = "testdomain02"
   elasticsearch_version = "OpenSearch_1.3"
   es_vpc_cidr = "10.0.0.0/16"
   azs = [
@@ -26,15 +26,20 @@ module "centralized_logging" {
   # Master Nodes - The default master_node_count is 3, default type is c5.large.
   # Master node defaults are sufficient for most cases except extremely large workloads.
   master_node_count = 3
-  dedicated_master_type = "c5.large.elasticsearch"
+  dedicated_master_type = "t3.small.elasticsearch"
   # Data Nodes - In 2-az configuration, instance_count must in multiples of 2.
   # In 3-az configuration, count can be any number above 3.
   instance_count = 2
-  instance_type = "r5.large.elasticsearch"
+  instance_type = "t3.small.elasticsearch"
 
   # EBS volumes
   volume_size = "10"
   volume_type = "gp2"
+
+  warm_enabled = false
+  warm_type = "ultrawarm1.medium.elasticsearch"
+  warm_count = 2
+
 
   # LAMBDA TRANSFORMER FUNCTION
   memory_size = 128
@@ -43,7 +48,7 @@ module "centralized_logging" {
   # KINESIS DATA STREAM
   shard_count = 1
 
-  spoke_accounts = ""
+  spoke_accounts = "328270397459"
   spoke_regions = "us-east-1"
   admin_email = "austin.thome1@gmail.com"
   bastion_key = "austin-personal"

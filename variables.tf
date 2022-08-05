@@ -24,6 +24,24 @@ variable "spoke_accounts" {
 
 # OPENSEARCH DOMAIN
 
+variable "warm_enabled" {
+  description = ""
+  type = bool
+  default = false
+}
+
+variable "warm_count" {
+  description = ""
+  type = number
+  default = 2
+}
+
+variable "warm_type" {
+  description = ""
+  type = string
+  default = "ultrawarm1.medium.elasticsearch"
+}
+
 variable "elasticsearch_version" {
   description = ""
   type = string

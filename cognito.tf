@@ -79,7 +79,7 @@ resource "aws_iam_role" "cognito_auth_role" {
       },
       "Condition": {
         "StringEquals": {
-          "cognito-identity.amazonaws.com:aud": "${aws_cognito_identity_pool.es_identity_pool.id}/*"
+          "cognito-identity.amazonaws.com:aud": "${aws_cognito_identity_pool.es_identity_pool.id}"
           },
         "ForAnyValue:StringLike": {
           "cognito-identity.amazonaws.com:amr": "authenticated"
@@ -187,7 +187,7 @@ resource "aws_iam_role_policy" "auth_role_policy" {
                 "es:ESHttpPatch"
             ],
             "Resource": [
-                "${aws_elasticsearch_domain.es_domain.arn}"
+                "${aws_elasticsearch_domain.es_domain.arn}/*"
             ],
             "Effect": "Allow"
         }

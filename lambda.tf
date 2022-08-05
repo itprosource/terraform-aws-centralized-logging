@@ -36,7 +36,7 @@ resource "aws_iam_role_policy" "helper_role_policy" {
                 "logs:CreateLogGroup"
             ],
             "Resource": [
-                "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:key/*",
+                "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:*",
                 "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:*:log-stream:*"
             ],
             "Effect": "Allow"
@@ -59,6 +59,24 @@ resource "aws_iam_role_policy" "helper_role_policy" {
             },
             "Action": "iam:CreateServiceLinkedRole",
             "Resource": "arn:aws:iam::*:role/aws-service-role/es.amazonaws.com/AWSServiceRoleForAmazonElasticsearchService*",
+            "Effect": "Allow"
+        }
+    ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "helper_role_destination_policy" {
+  name = "helper-role-destination-policy"
+  role = aws_iam_role.helper_role.id
+
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": "iam:PassRole",
+            "Resource": "${aws_iam_role.cw_destination_role.arn}",
             "Effect": "Allow"
         }
     ]
@@ -123,28 +141,8 @@ resource "aws_iam_role_policy" "helper_provider_event_svc_default_policy" {
     "Version": "2012-10-17",
     "Statement": [
         {
-            "Action": "lambda:InvokeFuntion",
-            "Resource": "${aws_iam_role.helper_role.arn}",
-            "Effect": "Allow"
-        },
-        {
-            "Action": [
-                "ec2:DescribeRegions",
-                "logs:PutDestination",
-                "logs:DeleteDestination",
-                "logs:PutDestinationPolicy"
-            ],
-            "Resource": "*",
-            "Effect": "Allow"
-        },
-        {
-            "Condition": {
-                "StringLike": {
-                    "iam:AWSServiceName": "es.amazonaws.com"
-                }
-            },
-            "Action": "iam:CreateServiceLinkedRole",
-            "Resource": "arn:aws:iam::*:role/aws-service-role/es.amazonaws.com/AWSServiceRoleForAmazonElasticsearchService*",
+            "Action": "lambda:InvokeFunction",
+            "Resource": "${aws_lambda_function.helper_lambda.arn}",
             "Effect": "Allow"
         }
     ]
@@ -155,7 +153,7 @@ EOF
 resource "aws_lambda_function" "helper_provider_framework_lambda" {
 
   s3_bucket = "solutions-${data.aws_region.current.name}"
-  s3_key = "centralized-logging/v4.0.1/asset9b4c683682a0773735625e441eabc438ac1d2b4ef65d28093ba33154aaaa2a66.zip"
+  s3_key = "centralized-logging/v4.0.1/assetc691172cdeefa2c91b5a2907f9d81118e47597634943344795f1a844192dd49c.zip"
   function_name = "HelperProviderFramework-${random_string.random.id}"
   role          = aws_iam_role.helper_provider_event_svc.arn
   description = "AWS CDK resource provider framework - onEvent (CL-PrimaryStack/HelperProvider)"
@@ -166,7 +164,7 @@ resource "aws_lambda_function" "helper_provider_framework_lambda" {
     }
   }
 
-  handler = "solutions-${data.aws_caller_identity.current.account_id}-assetc691172cdeefa2c91b5a2907f9d81118e47597634943344795f1a844192dd49c/framework.onEvent"
+  handler = "assetc691172cdeefa2c91b5a2907f9d81118e47597634943344795f1a844192dd49c/framework.onEvent"
   runtime = "nodejs12.x"
   timeout = 900
 
