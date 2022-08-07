@@ -330,32 +330,3 @@ EOF
     Domain = "${var.domain_name}-${random_string.random.id}"
   }
 }
-
-/*
-resource "aws_iam_role_policy" "auth_role_policy" {
-  name = "auth_role_policy"
-  role = aws_iam_role.cognito_auth_role.arn
-
-  policy = <<EOF
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Action": [
-                "es:ESHttpGet",
-                "es:ESHttpDelete",
-                "es:ESHttpPut",
-                "es:ESHttpPost",
-                "es:ESHttpHead",
-                "es:ESHttpPatch"
-            ],
-            "Resource": [
-                "${aws_elasticsearch_domain.es_domain.arn}"
-            ],
-            "Effect": "Allow"
-        },
-    ]
-}
-EOF
-}
-*/

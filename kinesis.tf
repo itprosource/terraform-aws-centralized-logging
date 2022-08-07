@@ -227,72 +227,8 @@ resource "aws_iam_role_policy" "cw_destination_policy" {
 EOF
 }
 
-
 resource "aws_cloudwatch_log_destination" "cw_destination" {
-  name       = "cl-destination-${random_string.random.id}"
+  name       = "cw_destination_${random_string.random.id}"
   role_arn   = aws_iam_role.cw_destination_role.arn
   target_arn = aws_kinesis_stream.cl_data_stream.arn
 }
-
-resource "aws_cloudformation_stack" "cdk-matadata" {
-  name = "cdk-metadata-${random_string.random.id}"
-
-  parameters = {
-    SpokeAccounts = var.spoke_accounts
-  }
-
-  template_body = <<STACK
-{
-  "Resources": {
-    "CDKMetadata": {
-      "Type": "AWS::CDK::Metadata",
-      "Properties": {
-        "Analytics": "v2:deflate64:H4sIAAAAAAAA/2VTXW/bMAz8LX1X1CUdsNel2VoM2DAv6fquyEzCxhY9fTgIDP/3UZLteOuTjifS5J3opVw+rOSHu8/q4ha6PN93mizIbueVPovNwRTKqho82Bj8UE2D5hjhhkyJHsmItXPgOf+Ybsg4b4P2YhOcp3oLjoLVEEsmPCenRj+Db4LvRRykQ1XLbktVrotnQRXqa5poQt+4lzIaCksHrKAXlar3pZLdUzA6zcZJE/7agvG71Him4z3bC/ewUFGUk0kbx7J7DPoM/lE5EBnG4gHl4zbXPO6FpqNBT7L77cAWRFVMmfAIvlCt0Myv3jPxTLpLnhn9dfzYPI5mrT2beqqZZEvo6GT3nY7PlkITsyfMYOctqHpgc9AL0CvZvTY60q/FRhQWW+VhF/Ymy76hLQUPL2qfHyrzN47dI40quV+EPdvxX2V+RF4uJp+5xUVdh6ZDdFMiniq68JDpSQe4Ax0s656k/UuM6zFfFVZXKedRO1BWn2R3czkjfv0/bNivACEVJsCkYfKFGkyuZMBinLbYjJs2j/nZKwrlRfnYZF0pm1xOoBdnNODQxd9s9H80f7g6oIUTOZBxMKiwBXsdU3T6sxZ2+Iuc5P1vsQTbC0MlyDd33y4/yuUnubp7c4gLG3g9apDbfP4F2FLoQfQDAAA="
-      },
-      "Metadata": {
-        "aws:cdk:path": "CL-PrimaryStack/CDKMetadata/Default"
-      }
-    }
-  }
-}
-STACK
-}
-
-/*
-resource "aws_cloudformation_stack" "cw_destination" {
-  name = "cw-destination-${random_string.random.id}"
-
-  parameters = {
-    SpokeAccounts = var.spoke_accounts
-  }
-
-  template_body = <<STACK
-{
-  "Parameters": {
-    "SpokeAccounts": {
-      "Type": "String",
-      "Default": "",
-      "Description": ""
-    }
-  },
-  "Resources": {
-    "CWDestination": {
-      "Type": "Custom::CWDestination",
-      "Properties": {
-        "ServiceToken": "${aws_lambda_function.helper_provider_framework_lambda.arn}",
-        "DestinationName": "CL-destination",
-        "Role": "${aws_iam_role.cw_destination_role.arn}",
-        "DataStream": "${aws_kinesis_stream.cl_data_stream.arn}",
-        "SpokeAccounts": {
-          "Ref": "SpokeAccounts"
-        }
-      }
-    }
-  }
-}
-STACK
-
-  depends_on = [aws_iam_role_policy.helper_role_policy]
-
-}
-*/
