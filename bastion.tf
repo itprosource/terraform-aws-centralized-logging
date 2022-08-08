@@ -65,11 +65,12 @@ resource "aws_instance" "jumpbox" {
   availability_zone = element(var.azs,count.index)
   iam_instance_profile = aws_iam_instance_profile.cl_bastion_ec2_profile.id
   key_name = var.bastion_key
-  security_groups = [aws_security_group.cl_bastion_sg.id]
+  vpc_security_group_ids = [aws_security_group.cl_bastion_sg.id]
+  #security_groups = [aws_security_group.cl_bastion_sg.id]
   subnet_id = element(aws_subnet.es_public_subnet.*.id,count.index)
 
   tags = {
-    Name = "cl_bastion-${var.domain_name}"
+    Name = "bastion-${var.domain_name}-${random_string.random.id}"
   }
 
 }
