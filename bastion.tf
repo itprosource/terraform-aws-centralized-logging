@@ -1,14 +1,15 @@
+# 443 is allowed from any address but RDP access is controlled by including IP ranges in ingress_addrs variable
 resource "aws_security_group" "bastion_sg" {
   name        = "bastion_sg-${var.domain_name}${random_string.random.id}"
   description = "Security group controlling Central Logging bastion host access."
   vpc_id      = aws_vpc.es_vpc.id
 
-  ingress {
-    from_port        = 80
-    to_port          = 80
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
-  }
+  #ingress {
+  #  from_port        = 80
+  #  to_port          = 80
+  #  protocol         = "tcp"
+  #  cidr_blocks      = ["0.0.0.0/0"]
+  #}
   ingress {
     from_port        = 443
     to_port          = 443
@@ -19,7 +20,7 @@ resource "aws_security_group" "bastion_sg" {
     from_port        = 3389
     to_port          = 3389
     protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
+   cidr_blocks      = [var.ingress_addrs]
   }
 
   egress {

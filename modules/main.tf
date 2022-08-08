@@ -53,4 +53,9 @@ module "centralized_logging" {
   admin_email = "austin.thome1@gmail.com"
   bastion_key = "austin-personal"
 
+  ingress_addrs = [
+    "0.0.0.0/0",
+    "10.0.0.0/24"
+  ]
+
 }
