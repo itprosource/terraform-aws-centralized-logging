@@ -6,7 +6,7 @@ module "centralized_logging" {
   source = "../"
 
   # Opensearch Domain
-  domain_name = "testdomain07"
+  domain_name = "testdomain08"
   elasticsearch_version = "OpenSearch_1.3"
   es_vpc_cidr = "10.0.0.0/16"
   azs = [
@@ -48,7 +48,7 @@ module "centralized_logging" {
   # KINESIS DATA STREAM
   shard_count = 1
 
-  spoke_accounts = "328270397459"
+  spoke_accounts = "590476071401"
   spoke_regions = "us-east-1"
   admin_email = "austin.thome1@gmail.com"
   bastion_key = "austin-personal"
