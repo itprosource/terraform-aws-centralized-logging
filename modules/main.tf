@@ -6,7 +6,7 @@ module "centralized_logging" {
   source = "../"
 
   # Opensearch Domain
-  domain_name = "testdomain05"
+  domain_name = "testdomain07"
   elasticsearch_version = "OpenSearch_1.3"
   es_vpc_cidr = "10.0.0.0/16"
   azs = [

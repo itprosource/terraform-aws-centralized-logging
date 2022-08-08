@@ -51,9 +51,7 @@ resource "aws_iam_role_policy" "cl_transformer_svc_default_policy" {
             "Resource": "${aws_kinesis_stream.cl_data_stream.arn}"
         },
         {
-            "Action": [
-                "firehose:PutRecordBatch"
-            ],
+            "Action": "firehose:PutRecordBatch",
             "Effect": "Allow",
             "Resource": "${aws_kinesis_firehose_delivery_stream.cl_firehose.arn}"
         }
@@ -80,7 +78,7 @@ resource "aws_lambda_function" "cl_transformer_lambda" {
       SOLUTION_ID = "SO0009"
       SOLUTION_VERSION = "v4.0.1"
       #CLUSTER_SIZE = ""
-      DELIVERY_STREAM = "CL-Firehose"
+      DELIVERY_STREAM = "${aws_kinesis_firehose_delivery_stream.cl_firehose.name}"
       CUSTOM_SDK_USER_AGENT = "AwsSolution/SO0009/v4.0.1"
     }
   }

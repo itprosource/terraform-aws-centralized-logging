@@ -3,7 +3,7 @@
 #####
 
 resource "aws_iam_role" "firehose_role" {
-  name = "firehose_role"
+  name = "firehose-role-${var.domain_name}-${random_string.random.id}"
 
   assume_role_policy = <<EOF
 {
@@ -23,7 +23,7 @@ EOF
 }
 
 resource "aws_kinesis_stream" "cl_data_stream" {
-  name             = "cl_data_stream"
+  name             = "data-stream-${var.domain_name}-${random_string.random.id}"
   shard_count      = 1
   retention_period = 24
 
@@ -33,7 +33,7 @@ resource "aws_kinesis_stream" "cl_data_stream" {
 }
 
 resource "aws_cloudwatch_log_group" "firehose_log_group" {
-  name = "/aws/kinesisfirehose/CL-Firehose"
+  name = "/aws/kinesisfirehose/${var.domain_name}-${random_string.random.id}"
   retention_in_days = 731
 
 }
@@ -49,7 +49,7 @@ resource "aws_cloudwatch_log_stream" "firehose_s3_log_stream" {
 }
 
 resource "aws_iam_role_policy" "cl_firehose_policy" {
-  name = "cl-firehose-policy"
+  name = "firehose-policy-${var.domain_name}-${random_string.random.id}"
   role = aws_iam_role.firehose_role.name
 
   policy = <<EOF
