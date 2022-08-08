@@ -16,12 +16,12 @@ resource "aws_security_group" "bastion_sg" {
     protocol         = "tcp"
     cidr_blocks      = ["0.0.0.0/0"]
   }
-  ingress {
-    from_port        = 3389
-    to_port          = 3389
-    protocol         = "tcp"
-   cidr_blocks      = [var.ingress_addrs]
-  }
+  #ingress {
+  #  from_port        = 3389
+  #  to_port          = 3389
+  #  protocol         = "tcp"
+  # cidr_blocks      = [var.ingress_addrs]
+  #}
 
   egress {
     from_port        = 0
@@ -33,6 +33,16 @@ resource "aws_security_group" "bastion_sg" {
   tags = {
     Name = "bastion_sg-${var.domain_name}${random_string.random.id}"
   }
+}
+
+resource "aws_security_group_rule" "rdp_ingress" {
+  count = length(var.ingress_addrs)
+  type              = "ingress"
+  from_port         = 3389
+  to_port           = 3389
+  protocol          = "tcp"
+  cidr_blocks       = element([var.ingress_addrs],count.index)
+  security_group_id = aws_security_group.bastion_sg.id
 }
 
 resource "aws_iam_role" "cl_bastion_instance_role" {

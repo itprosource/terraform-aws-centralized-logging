@@ -56,6 +56,6 @@ module "centralized_logging" {
   ingress_addrs = [
     "0.0.0.0/0",
     "10.0.0.0/24"
-  ]
+    ]
 
 }
