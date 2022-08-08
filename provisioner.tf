@@ -1,3 +1,4 @@
+# Creates access policy file used to control Destination access permissions. 
 resource "local_file" "access_policy" {
   content =<<EOF
 {
@@ -20,12 +21,14 @@ EOF
   depends_on = [aws_cloudwatch_log_destination.cw_destination]
 }
 
+# Used to delay running the local-exec below - otherwise a race condition causes the command to attempt executing before the access policy file is available. 
 resource "time_sleep" "wait_60_seconds" {
   depends_on = [local_file.access_policy]
 
   create_duration = "60s"
 }
 
+# Command to create or modify Destination access policy based on access_policy.json file. 
 resource "null_resource" "put_destination_policy" {
 
   triggers = {
