@@ -30,6 +30,11 @@ resource "aws_cognito_user_pool" "es_user_pool_cognito" {
     mutable = true
     name = "email"
     required = true
+
+    string_attribute_constraints {
+      max_length =  16
+      min_length = 16
+    }
   }
 
   #sms_verification_message = "The verification code to your new account is {####}"
