@@ -44,6 +44,10 @@ resource "aws_cognito_user_pool" "es_user_pool_cognito" {
     email_subject = "Verify your new account"
     sms_message = "The verification code to your new account is {####}"
   }
+
+  lifecycle {
+    ignore_changes = [schema]
+  }
 }
 
 resource "aws_cognito_user_pool_domain" "es_user_pool_domain" {

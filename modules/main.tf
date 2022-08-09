@@ -7,7 +7,7 @@ module "centralized_logging" {
 
   # OPENSEARCH DOMAIN DETAILS
   # For the version, you can select Opensearch or Elasticsearch versions.
-  domain_name = "testdomain08"
+  domain_name = "testdomain10"
   elasticsearch_version = "OpenSearch_1.3"
 
   # Spoke accounts are given access to utilize the Cloudwatch Destination as a subscription filter.
@@ -36,11 +36,11 @@ module "centralized_logging" {
   # Master Nodes - The default master_node_count is 3.
   # Master node defaults are sufficient for most cases except extremely large workloads.
   master_node_count = 3
-  dedicated_master_type = "t3.small.elasticsearch"
+  dedicated_master_type = "m5.large.elasticsearch"
   # Data Nodes - In 2-az configuration, instance_count must in multiples of 2.
   # In 3-az configuration, count can be any number above 3.
   instance_count = 2
-  instance_type = "t3.small.elasticsearch"
+  instance_type = "m5.large.elasticsearch"
 
   # EBS VOLUMES
   # Storage will need to scale with expected data ingest size.
@@ -50,7 +50,7 @@ module "centralized_logging" {
   # ULTRAWARM STORAGE
   # Enables ultrawarm nodes for cost-saving data retention. Will enable hot/warm/cold storage lifecycle.
   # If enabled,an index management policy must be deployed in Opensearch itself before lifecycling will begin.
-  warm_enabled = false
+  warm_enabled = true
   warm_type = "ultrawarm1.medium.elasticsearch"
   warm_count = 2
 
