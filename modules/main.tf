@@ -5,9 +5,19 @@ provider "aws" {
 module "centralized_logging" {
   source = "../"
 
-  # Opensearch Domain
+  # OPENSEARCH DOMAIN DETAILS
+  # For the version, you can select Opensearch or Elasticsearch versions.
   domain_name = "testdomain08"
   elasticsearch_version = "OpenSearch_1.3"
+
+  # Spoke accounts are given access to utilize the Cloudwatch Destination as a subscription filter.
+  # Enter spoke account #s separated by a comma. Ex: "111111111111,222222222222,333333333333"
+  spoke_accounts = "590476071401"
+
+  # The initial admin login.
+  admin_email = "austin.thome1@gmail.com"
+
+  # Define the network space for the Opensearch cluster.
   es_vpc_cidr = "10.0.0.0/16"
   azs = [
     "us-east-1a",
@@ -23,7 +33,7 @@ module "centralized_logging" {
   ]
 
   # CLUSTER CONFIGURATION
-  # Master Nodes - The default master_node_count is 3, default type is c5.large.
+  # Master Nodes - The default master_node_count is 3.
   # Master node defaults are sufficient for most cases except extremely large workloads.
   master_node_count = 3
   dedicated_master_type = "t3.small.elasticsearch"
@@ -32,32 +42,40 @@ module "centralized_logging" {
   instance_count = 2
   instance_type = "t3.small.elasticsearch"
 
-  # EBS volumes
+  # EBS VOLUMES
+  # Storage will need to scale with expected data ingest size.
   volume_size = "10"
   volume_type = "gp2"
 
+  # ULTRAWARM STORAGE
+  # Enables ultrawarm nodes for cost-saving data retention. Will enable hot/warm/cold storage lifecycle.
+  # If enabled,an index management policy must be deployed in Opensearch itself before lifecycling will begin.
   warm_enabled = false
   warm_type = "ultrawarm1.medium.elasticsearch"
   warm_count = 2
 
-
   # LAMBDA TRANSFORMER FUNCTION
+  # Resources will need to scale with expected data ingest size.
   memory_size = 128
   ephemeral_storage = 512
 
   # KINESIS DATA STREAM
+  # For modest workloads, a count of 2 to 4 will be sufficient.
   shard_count = 1
 
-  spoke_accounts = "590476071401"
-  spoke_regions = "us-east-1"
-  admin_email = "austin.thome1@gmail.com"
+  # BASTION HOST
+  # Set the instance type for the bastion host.
+  # For many cases, t3.micro will be sufficient. Select larger types for cases needing multiple simultaneous logins.
+  bastion_type = "t3.micro"
 
   # Switch to create a private key for bastion access.
   # Set to TRUE to create a key and store it in Secrets Manager during creation.
   # Set to FALSE to use an existing key, identified via bastion_key_name.
   create_private_key = true
   bastion_key_name = "es-bastion-key"
-  bastion_type = "t3.micro"
+
+  # Set the allowed RDP IP address ranges.
+  # Allow All (0.0.0.0/0) is not recommended for production cases.
   ingress_rules = {
     rule01 = {
       cidr    = "0.0.0.0/0"
@@ -65,7 +83,7 @@ module "centralized_logging" {
     },
     rule02 = {
       cidr   = "10.0.0.0/24"
-      desc   = "Allow Corporate Range"
+      desc   = "Allow Example Corporate Range"
     }
   }
 
