@@ -99,7 +99,7 @@ resource "aws_key_pair" "es_key_pair" {
   count = var.create_private_key ? 1 : 0
 
   key_name = var.bastion_key_name
-  public_key = tls_private_key.es_bastion_key.public_key_pem
+  public_key = tls_private_key.es_bastion_key[0].public_key_openssh
   tags = {
     Name = "key-${var.domain_name}-${random_string.random.id}"
   }
@@ -114,6 +114,6 @@ resource "aws_secretsmanager_secret" "es_secret" {
 resource "aws_secretsmanager_secret_version" "secret_version" {
   count = var.create_private_key ? 1 : 0
 
-  secret_id     = aws_secretsmanager_secret.es_secret.id
-  secret_string = tls_private_key.es_bastion_key.private_key_pem
+  secret_id     = aws_secretsmanager_secret.es_secret[0].id
+  secret_string = tls_private_key.es_bastion_key[0].private_key_pem
 }
