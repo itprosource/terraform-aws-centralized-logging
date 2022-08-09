@@ -16,13 +16,13 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
-This module deploys a VPC-hosted Opensearch or Elasticsearch cluster as depicated in the Centralized Logging Solution - using Cloudwatch Destinations/Kinesis Data stream to ingest data, pass through a Lambda function which transforms data into Opensearch-readable format, then pipes formatted data through Kinesis Firehose before depositing logs in Opensearch cluster. Access to Opensearch dashboard is faciliated through an ec2 Bastion host and Cognito user authentication. Includes option for ultrawarm storage. 
+This module deploys a VPC-hosted Opensearch or Elasticsearch cluster as depicted in AWS' Centralized Logging Solution - using Cloudwatch Destinations/Kinesis Data stream to ingest data, pass through a Lambda function which transforms data into Opensearch-readable format, then pipes formatted data through Kinesis Firehose before depositing logs in the Opensearch cluster. Access to Opensearch dashboard is faciliated through an ec2 Bastion host and Cognito user authentication. Includes option for ultrawarm storage. 
 
 ### User Management
 User accounts are managed in Cognito. Simply go to the user pool to add or remove users. 
 
 ### VPC Security
-The cluster is configured to allow external access only through 443 on a bastion host. It is not recommended to leave the dashboard login screen open to the public. Use the bastion host to access the dashboard. 
+The cluster is configured to allow external access only through 443 on a bastion host. It is not recommended to leave the dashboard login screen open to the public. Use the bastion host to access the dashboard. Bastion host access rules are controlled in the template. 
 
 # Future Updates
 As time permits, I plan to work on the following updates:
