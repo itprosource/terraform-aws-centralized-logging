@@ -3,6 +3,7 @@
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
+# Pulls latest Windows ami from Amzn Marketplace
 data "aws_ami" "windows" {
      most_recent = true
 filter {

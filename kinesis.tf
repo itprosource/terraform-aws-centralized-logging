@@ -1,8 +1,4 @@
-#####
-# Kinesis
-#####
-
-resource "aws_iam_role" "firehose_role" {
+resource "aws_iam_role" "es_firehose_role" {
   name = "firehose-role-${var.domain_name}-${random_string.random.id}"
 
   assume_role_policy = <<EOF
@@ -22,7 +18,7 @@ resource "aws_iam_role" "firehose_role" {
 EOF
 }
 
-resource "aws_kinesis_stream" "cl_data_stream" {
+resource "aws_kinesis_stream" "es_data_stream" {
   name             = "data-stream-${var.domain_name}-${random_string.random.id}"
   shard_count      = 1
   retention_period = 24
@@ -32,25 +28,25 @@ resource "aws_kinesis_stream" "cl_data_stream" {
 
 }
 
-resource "aws_cloudwatch_log_group" "firehose_log_group" {
+resource "aws_cloudwatch_log_group" "es_firehose_log_group" {
   name = "/aws/kinesisfirehose/${var.domain_name}-${random_string.random.id}"
   retention_in_days = 731
 
 }
 
-resource "aws_cloudwatch_log_stream" "firehose_es_log_stream" {
+resource "aws_cloudwatch_log_stream" "es_firehose_es_log_stream" {
   name           = "ElasticSearchDelivery"
-  log_group_name = aws_cloudwatch_log_group.firehose_log_group.name
+  log_group_name = aws_cloudwatch_log_group.es_firehose_log_group.name
 }
 
-resource "aws_cloudwatch_log_stream" "firehose_s3_log_stream" {
+resource "aws_cloudwatch_log_stream" "es_firehose_s3_log_stream" {
   name           = "S3Delivery"
-  log_group_name = aws_cloudwatch_log_group.firehose_log_group.name
+  log_group_name = aws_cloudwatch_log_group.es_firehose_log_group.name
 }
 
-resource "aws_iam_role_policy" "cl_firehose_policy" {
+resource "aws_iam_role_policy" "es_firehose_policy" {
   name = "firehose-policy-${var.domain_name}-${random_string.random.id}"
-  role = aws_iam_role.firehose_role.name
+  role = aws_iam_role.es_firehose_role.name
 
   policy = <<EOF
 {
@@ -132,7 +128,7 @@ resource "aws_iam_role_policy" "cl_firehose_policy" {
 				"logs:PutLogEvents",
 				"logs:CreateLogStream"
 			],
-			"Resource": "${aws_cloudwatch_log_group.firehose_log_group.arn}",
+			"Resource": "${aws_cloudwatch_log_group.es_firehose_log_group.arn}",
 			"Effect": "Allow"
 		},
 		{
@@ -144,7 +140,7 @@ resource "aws_iam_role_policy" "cl_firehose_policy" {
 					"kms:ViaService": "kinesis.${data.aws_region.current.name}.amazonaws.com"
 				},
 				"StringLike": {
-					"kms:EncryptionContext:aws:kinesis:arn": "${aws_kinesis_stream.cl_data_stream.arn}"
+					"kms:EncryptionContext:aws:kinesis:arn": "${aws_kinesis_stream.es_data_stream.arn}"
 				}
 			}
 		}
@@ -153,25 +149,25 @@ resource "aws_iam_role_policy" "cl_firehose_policy" {
 EOF
 }
 
-resource "aws_kinesis_firehose_delivery_stream" "cl_firehose" {
-  name        = "cl-firehose-${random_string.random.id}"
+resource "aws_kinesis_firehose_delivery_stream" "es_firehose" {
+  name        = "firehose-${var.domain_name}-${random_string.random.id}"
   destination = "elasticsearch"
 
   elasticsearch_configuration {
     cloudwatch_logging_options {
       enabled         = true
-      log_group_name  = "/aws/kinesisfirehose/CL-Firehose"
-      log_stream_name = "${aws_cloudwatch_log_stream.firehose_es_log_stream.name}"
+      log_group_name  = "/aws/kinesisfirehose/es-firehose-${var.domain_name}-${random_string.random.id}"
+      log_stream_name = "${aws_cloudwatch_log_stream.es_firehose_es_log_stream.name}"
     }
 
     domain_arn = aws_elasticsearch_domain.es_domain.arn
-    role_arn   = aws_iam_role.firehose_role.arn
+    role_arn   = aws_iam_role.es_firehose_role.arn
     index_name = "cwl"
 
     vpc_config {
       subnet_ids         = aws_subnet.es_private_subnet.*.id
       security_group_ids = [aws_security_group.es_sg.id]
-      role_arn           = aws_iam_role.firehose_role.arn
+      role_arn           = aws_iam_role.es_firehose_role.arn
     }
   }
 
@@ -180,18 +176,18 @@ resource "aws_kinesis_firehose_delivery_stream" "cl_firehose" {
 
     cloudwatch_logging_options {
             enabled = true
-            log_group_name = "/aws/kinesisfirehose/CL-Firehose"
-            log_stream_name = aws_cloudwatch_log_stream.firehose_s3_log_stream.name
+            log_group_name = "/aws/kinesisfirehose/s3-firehose-${var.domain_name}-${random_string.random.id}"
+            log_stream_name = aws_cloudwatch_log_stream.es_firehose_s3_log_stream.name
         }
 
-        role_arn = aws_iam_role.firehose_role.arn
+        role_arn = aws_iam_role.es_firehose_role.arn
     }
 
-  depends_on = [aws_iam_role_policy.cl_firehose_policy]
+  depends_on = [aws_iam_role_policy.es_firehose_policy]
 }
 
-resource "aws_iam_role" "cw_destination_role" {
-  name = "cw_destination_role"
+resource "aws_iam_role" "es_cw_destination_role" {
+  name = "cw_destination_role-${var.domain_name}-${random_string.random.id}"
 
   assume_role_policy = <<EOF
 {
@@ -209,9 +205,9 @@ resource "aws_iam_role" "cw_destination_role" {
 EOF
 }
 
-resource "aws_iam_role_policy" "cw_destination_policy" {
-  name = "cw_destination_policy"
-  role = aws_iam_role.cw_destination_role.name
+resource "aws_iam_role_policy" "es_cw_destination_policy" {
+  name = "cw_destination_policy--${var.domain_name}-${random_string.random.id}"
+  role = aws_iam_role.es_cw_destination_role.name
 
   policy = <<EOF
 {
@@ -220,7 +216,7 @@ resource "aws_iam_role_policy" "cw_destination_policy" {
         {
             "Action": "kinesis:PutRecord",
             "Effect": "Allow",
-            "Resource": "${aws_kinesis_stream.cl_data_stream.arn}"
+            "Resource": "${aws_kinesis_stream.es_data_stream.arn}"
         }
     ]
 }
@@ -229,6 +225,6 @@ EOF
 
 resource "aws_cloudwatch_log_destination" "cw_destination" {
   name       = "cw_destination_${random_string.random.id}"
-  role_arn   = aws_iam_role.cw_destination_role.arn
-  target_arn = aws_kinesis_stream.cl_data_stream.arn
+  role_arn   = aws_iam_role.es_cw_destination_role.arn
+  target_arn = aws_kinesis_stream.es_data_stream.arn
 }

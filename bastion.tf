@@ -1,5 +1,6 @@
-# 443 is allowed from any address but RDP access is controlled by including IP ranges in ingress_addrs variable
-resource "aws_security_group" "bastion_sg" {
+# 443 is allowed from any address but RDP access is controlled by including IP ranges and descriptions
+# in ingress_rules variable
+resource "aws_security_group" "es_bastion_sg" {
   name        = "bastion_sg-${var.domain_name}${random_string.random.id}"
   description = "Security group controlling Central Logging bastion host access."
   vpc_id      = aws_vpc.es_vpc.id
@@ -23,7 +24,7 @@ resource "aws_security_group" "bastion_sg" {
   }
 }
 
-resource "aws_security_group_rule" "ingress" {
+resource "aws_security_group_rule" "es_ingress" {
   for_each = var.ingress_rules
   type              = "ingress"
   from_port         = 3389
@@ -31,10 +32,10 @@ resource "aws_security_group_rule" "ingress" {
   protocol          = "tcp"
   cidr_blocks       = [each.value.cidr]
   description       = each.value.desc
-  security_group_id = aws_security_group.bastion_sg.id
+  security_group_id = aws_security_group.es_bastion_sg.id
 }
 
-resource "aws_iam_role" "cl_bastion_instance_role" {
+resource "aws_iam_role" "es_bastion_instance_role" {
   name = "bastion_ec2_role-${var.domain_name}-${random_string.random.id}"
 
   assume_role_policy = <<EOF
@@ -53,24 +54,23 @@ resource "aws_iam_role" "cl_bastion_instance_role" {
 EOF
 }
 
-resource "aws_iam_instance_profile" "cl_bastion_ec2_profile" {
+resource "aws_iam_instance_profile" "es_bastion_ec2_profile" {
   name = "cl_jumpbox_ec2_profile-${random_string.random.id}"
-  role = aws_iam_role.cl_bastion_instance_role.name
+  role = aws_iam_role.es_bastion_instance_role.name
 }
 
-resource "aws_instance" "jumpbox" {
+resource "aws_instance" "es_jumpbox" {
   count = 1
   ami           = data.aws_ami.windows.id
   instance_type = "t3.micro"
   availability_zone = element(var.azs,count.index)
-  iam_instance_profile = aws_iam_instance_profile.cl_bastion_ec2_profile.id
+  iam_instance_profile = aws_iam_instance_profile.es_bastion_ec2_profile.id
   key_name = var.bastion_key
-  vpc_security_group_ids = [aws_security_group.bastion_sg.id]
+  vpc_security_group_ids = [aws_security_group.es_bastion_sg.id]
   #security_groups = [aws_security_group.cl_bastion_sg.id]
   subnet_id = element(aws_subnet.es_public_subnet.*.id,count.index)
 
   tags = {
     Name = "bastion-${var.domain_name}-${random_string.random.id}"
   }
-
 }
