@@ -1,4 +1,3 @@
-
 # NETWORK COMPONENTS
 
 resource "aws_cloudwatch_log_group" "es_vpc_flow_log_group" {
