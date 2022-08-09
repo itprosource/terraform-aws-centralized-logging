@@ -1,3 +1,4 @@
+### SECURITY GROUP
 # 443 is allowed from any address but RDP access is controlled by including IP ranges and descriptions
 # in ingress_rules variable
 resource "aws_security_group" "es_bastion_sg" {
@@ -35,6 +36,8 @@ resource "aws_security_group_rule" "es_ingress" {
   security_group_id = aws_security_group.es_bastion_sg.id
 }
 
+### IAM
+
 resource "aws_iam_role" "es_bastion_instance_role" {
   name = "bastion_ec2_role-${var.domain_name}-${random_string.random.id}"
 
@@ -58,6 +61,8 @@ resource "aws_iam_instance_profile" "es_bastion_ec2_profile" {
   name = "cl_jumpbox_ec2_profile-${random_string.random.id}"
   role = aws_iam_role.es_bastion_instance_role.name
 }
+
+### BASTION HOST
 
 resource "aws_instance" "es_jumpbox" {
   count = 1
