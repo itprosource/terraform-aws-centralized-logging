@@ -52,7 +52,11 @@ module "centralized_logging" {
   spoke_regions = "us-east-1"
   admin_email = "austin.thome1@gmail.com"
 
-  bastion_key = "austin-personal"
+  # Switch to create a private key for bastion access.
+  # Set to TRUE to create a key and store it in Secrets Manager during creation.
+  # Set to FALSE to use an existing key, identified via bastion_key_name.
+  create_private_key = true
+  bastion_key_name = "es-bastion-key"
   bastion_type = "t3.micro"
   ingress_rules = {
     rule01 = {

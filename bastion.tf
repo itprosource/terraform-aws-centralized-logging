@@ -66,11 +66,12 @@ resource "aws_iam_instance_profile" "es_bastion_ec2_profile" {
 
 resource "aws_instance" "es_jumpbox" {
   count = 1
+
   ami           = data.aws_ami.windows.id
   instance_type = var.bastion_type
   availability_zone = element(var.azs,count.index)
   iam_instance_profile = aws_iam_instance_profile.es_bastion_ec2_profile.id
-  key_name = var.bastion_key
+  key_name = var.bastion_key_name
   vpc_security_group_ids = [aws_security_group.es_bastion_sg.id]
   #security_groups = [aws_security_group.cl_bastion_sg.id]
   subnet_id = element(aws_subnet.es_public_subnet.*.id,count.index)
@@ -78,4 +79,31 @@ resource "aws_instance" "es_jumpbox" {
   tags = {
     Name = "bastion-${var.domain_name}-${random_string.random.id}"
   }
+}
+
+### PRIVATE KEY
+
+# Optional. Stored in Secrets Manager.
+resource "tls_private_key" "es_bastion_key" {
+  count = var.create_private_key ? 1 : 0
+
+  algorithm = "RSA"
+  rsa_bits  = 2048
+}
+
+resource "aws_key_pair" "es_key_pair" {
+  key_name = var.bastion_key_name
+  public_key = tls_private_key.es_bastion_key.public_key_pem
+  tags = {
+    Name = "key-${var.domain_name}-${random_string.random.id}"
+  }
+}
+
+resource "aws_secretsmanager_secret" "es_secret" {
+  name = "key-${var.domain_name}-${random_string.random.id}"
+}
+
+resource "aws_secretsmanager_secret_version" "secret_version" {
+  secret_id     = aws_secretsmanager_secret.es_secret.id
+  secret_string = tls_private_key.es_bastion_key.private_key_pem
 }

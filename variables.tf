@@ -4,7 +4,7 @@ variable "azs" {
   default = []
 }
 
-variable "bastion_key" {
+variable "bastion_key_name" {
   description = ""
   type = string
   default = ""
@@ -152,4 +152,10 @@ variable "bastion_type" {
   description = ""
   type = string
   default = ""
+}
+
+variable "create_private_key" {
+  description = ""
+  type = bool
+  default = false
 }
