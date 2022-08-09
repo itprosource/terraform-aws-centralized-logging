@@ -51,8 +51,9 @@ module "centralized_logging" {
   spoke_accounts = "590476071401"
   spoke_regions = "us-east-1"
   admin_email = "austin.thome1@gmail.com"
-  bastion_key = "austin-personal"
 
+  bastion_key = "austin-personal"
+  bastion_type = "t3.micro"
   ingress_rules = {
     rule01 = {
       cidr    = "0.0.0.0/0"

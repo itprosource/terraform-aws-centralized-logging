@@ -147,3 +147,9 @@ variable "ingress_rules" {
   description = ""
   default = {}
 }
+
+variable "bastion_type" {
+  description = ""
+  type = string
+  default = ""
+}

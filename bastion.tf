@@ -67,7 +67,7 @@ resource "aws_iam_instance_profile" "es_bastion_ec2_profile" {
 resource "aws_instance" "es_jumpbox" {
   count = 1
   ami           = data.aws_ami.windows.id
-  instance_type = "t3.micro"
+  instance_type = var.bastion_type
   availability_zone = element(var.azs,count.index)
   iam_instance_profile = aws_iam_instance_profile.es_bastion_ec2_profile.id
   key_name = var.bastion_key
