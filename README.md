@@ -9,7 +9,7 @@
 <h3 align="center">Terraform - Centralized Logging Solution</h3>
 
   <p align="center">
-    Template which deploys an Opensearch/Elasticsearch cluster with Kinesis-based ingest pipeline. Based on AWS-curate [Centralized Logging Solution](https://aws.amazon.com/solutions/implementations/centralized-logging/). 
+    Template which deploys an Opensearch/Elasticsearch cluster with Kinesis-based ingest pipeline. Based on AWS-curated <a href="https://aws.amazon.com/solutions/implementations/centralized-logging/">Centralized Logging Solution</a>.
     <br />
   </p>
 </div>
