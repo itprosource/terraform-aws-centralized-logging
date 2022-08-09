@@ -7,7 +7,7 @@ module "centralized_logging" {
 
   # OPENSEARCH DOMAIN DETAILS
   # For the version, you can select Opensearch or Elasticsearch versions.
-  domain_name = "testdomain10"
+  domain_name = "testdomain"
   elasticsearch_version = "OpenSearch_1.3"
 
   # Spoke accounts are given access to utilize the Cloudwatch Destination as a subscription filter.

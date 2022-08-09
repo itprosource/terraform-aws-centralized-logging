@@ -21,7 +21,8 @@ EOF
   depends_on = [aws_cloudwatch_log_destination.cw_destination]
 }
 
-# Used to delay running the local-exec below - otherwise a race condition causes the command to attempt executing before the access policy file is available. 
+# Used to delay running the local-exec below - otherwise a race condition causes the command to attempt
+# executing before the access policy file is available.
 resource "time_sleep" "wait_60_seconds" {
   depends_on = [local_file.access_policy]
 
