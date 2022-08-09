@@ -61,8 +61,8 @@ resource "aws_iam_role_policy" "es_firehose_policy" {
 				"s3:PutObject"
 			],
 			"Resource": [
-				"arn:aws:s3:::${aws_s3_bucket.access_logs_bucket.bucket}",
-				"arn:aws:s3:::${aws_s3_bucket.access_logs_bucket.bucket}/*"
+				"arn:aws:s3:::${aws_s3_bucket.es_access_logs_bucket.bucket}",
+				"arn:aws:s3:::${aws_s3_bucket.es_access_logs_bucket.bucket}/*"
 			],
 			"Effect": "Allow"
 		},
@@ -76,7 +76,7 @@ resource "aws_iam_role_policy" "es_firehose_policy" {
 					"kms:ViaService": "s3.${data.aws_region.current.name}.amazonaws.com"
 				},
 				"StringLike": {
-					"kms:EncryptionContext:aws:s3:arn": "arn:aws:s3:::${aws_s3_bucket.cl_bucket.bucket}/*"
+					"kms:EncryptionContext:aws:s3:arn": "arn:aws:s3:::${aws_s3_bucket.es_bucket.bucket}/*"
 				}
 			},
 			"Effect": "Allow",
@@ -172,7 +172,7 @@ resource "aws_kinesis_firehose_delivery_stream" "es_firehose" {
   }
 
   s3_configuration {
-    bucket_arn = aws_s3_bucket.cl_bucket.arn
+    bucket_arn = aws_s3_bucket.es_bucket.arn
 
     cloudwatch_logging_options {
             enabled = true
