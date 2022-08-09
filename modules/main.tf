@@ -53,9 +53,15 @@ module "centralized_logging" {
   admin_email = "austin.thome1@gmail.com"
   bastion_key = "austin-personal"
 
-  ingress_addrs = [
-    "0.0.0.0/0",
-    "10.0.0.0/24"
-    ]
+  ingress_rules = {
+    rule01 = {
+      cidr    = "0.0.0.0/0"
+      desc    = "Allow All"
+    },
+    rule02 = {
+      cidr   = "10.0.0.0/24"
+      desc   = "Allow Corporate Range"
+    }
+  }
 
 }

@@ -4,24 +4,12 @@ resource "aws_security_group" "bastion_sg" {
   description = "Security group controlling Central Logging bastion host access."
   vpc_id      = aws_vpc.es_vpc.id
 
-  #ingress {
-  #  from_port        = 80
-  #  to_port          = 80
-  #  protocol         = "tcp"
-  #  cidr_blocks      = ["0.0.0.0/0"]
-  #}
   ingress {
     from_port        = 443
     to_port          = 443
     protocol         = "tcp"
     cidr_blocks      = ["0.0.0.0/0"]
   }
-  #ingress {
-  #  from_port        = 3389
-  #  to_port          = 3389
-  #  protocol         = "tcp"
-  # cidr_blocks      = [var.ingress_addrs]
-  #}
 
   egress {
     from_port        = 0
@@ -35,18 +23,19 @@ resource "aws_security_group" "bastion_sg" {
   }
 }
 
-resource "aws_security_group_rule" "rdp_ingress" {
-  count = length(var.ingress_addrs)
+resource "aws_security_group_rule" "ingress" {
+  for_each = var.ingress_rules
   type              = "ingress"
   from_port         = 3389
   to_port           = 3389
   protocol          = "tcp"
-  cidr_blocks       = element([var.ingress_addrs],count.index)
+  cidr_blocks       = [each.value.cidr]
+  description       = each.value.desc
   security_group_id = aws_security_group.bastion_sg.id
 }
 
 resource "aws_iam_role" "cl_bastion_instance_role" {
-  name = "cl_bastion_ec2_role"
+  name = "bastion_ec2_role-${var.domain_name}-${random_string.random.id}"
 
   assume_role_policy = <<EOF
 {

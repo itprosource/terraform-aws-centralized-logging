@@ -142,8 +142,8 @@ variable "shard_count" {
   default = 1
 }
 
-variable "ingress_addrs" {
+variable "ingress_rules" {
+  type = map(map(any))
   description = ""
-  type = list(string)
-  default = []
+  default = {}
 }
