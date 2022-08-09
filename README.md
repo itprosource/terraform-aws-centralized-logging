@@ -26,7 +26,7 @@ The cluster is configured to allow external access only through 443 on a bastion
 
 # Future Updates
 As time permits, I plan to work on the following updates:
-1. Key Cloudwatch alarms. AWS curates a list of <a href="(https://docs.aws.amazon.com/opensearch-service/latest/developerguide/cloudwatch-alarms.html)">best-practice Cloudwatch alarms</a> for monitoring the Opensearch service itself. I would like to add an option for deploying these in the template. 
+1. Key Cloudwatch alarms. AWS curates a list of <a href="https://docs.aws.amazon.com/opensearch-service/latest/developerguide/cloudwatch-alarms.html)">best-practice Cloudwatch alarms</a> for monitoring the Opensearch service itself. I would like to add an option for deploying these in the template. 
 2. Build out more Opensearch options - Custom Endpoints, Fine-Grained Access Control, etc. 
 
 ### Built With
