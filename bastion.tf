@@ -79,6 +79,10 @@ resource "aws_instance" "es_jumpbox" {
   tags = {
     Name = "bastion-${var.domain_name}-${random_string.random.id}"
   }
+
+  depends_on = [
+    aws_elasticsearch_domain.es_domain
+  ]
 }
 
 ### PRIVATE KEY
@@ -92,6 +96,8 @@ resource "tls_private_key" "es_bastion_key" {
 }
 
 resource "aws_key_pair" "es_key_pair" {
+  count = var.create_private_key ? 1 : 0
+
   key_name = var.bastion_key_name
   public_key = tls_private_key.es_bastion_key.public_key_pem
   tags = {
@@ -100,10 +106,14 @@ resource "aws_key_pair" "es_key_pair" {
 }
 
 resource "aws_secretsmanager_secret" "es_secret" {
+  count = var.create_private_key ? 1 : 0
+
   name = "key-${var.domain_name}-${random_string.random.id}"
 }
 
 resource "aws_secretsmanager_secret_version" "secret_version" {
+  count = var.create_private_key ? 1 : 0
+
   secret_id     = aws_secretsmanager_secret.es_secret.id
   secret_string = tls_private_key.es_bastion_key.private_key_pem
 }
