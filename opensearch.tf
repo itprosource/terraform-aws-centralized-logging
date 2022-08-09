@@ -1,16 +1,14 @@
 
 # NETWORK COMPONENTS
 
-resource "aws_cloudwatch_log_group" "vpc_flow_log_group" {
-  name = "cl-vpc-flow-log-group"
+resource "aws_cloudwatch_log_group" "es_vpc_flow_log_group" {
+  name = "vpc-flow-log-group-${var.domain_name}-${random_string.random.id}"
   retention_in_days = 731
 
-  tags = {
-  }
 }
 
-resource "aws_iam_role" "flow_role" {
-  name = "flow_role"
+resource "aws_iam_role" "es_flow_role" {
+  name = "flow_role-${var.domain_name}-${random_string.random.id}"
 
   assume_role_policy = <<EOF
 {
@@ -29,9 +27,9 @@ resource "aws_iam_role" "flow_role" {
 EOF
 }
 
-resource "aws_iam_role_policy" "flow_role_default_policy" {
-  name = "flow-role-default-policy"
-  role = aws_iam_role.flow_role.name
+resource "aws_iam_role_policy" "es_flow_role_default_policy" {
+  name = "flow-role-default-policy-${var.domain_name}-${random_string.random.id}"
+  role = aws_iam_role.es_flow_role.name
 
   policy = <<EOF
 {
@@ -44,7 +42,7 @@ resource "aws_iam_role_policy" "flow_role_default_policy" {
                 "logs:DescribeLogStreams"
             ],
             "Resource": [
-                "${aws_cloudwatch_log_group.vpc_flow_log_group.arn}"
+                "${aws_cloudwatch_log_group.es_vpc_flow_log_group.arn}"
             ],
             "Effect": "Allow"
         }
@@ -148,15 +146,15 @@ resource "aws_internet_gateway" "es_vpc_igw" {
 resource "aws_flow_log" "aws_vpc_flow_log" {
   vpc_id = aws_vpc.es_vpc.id
   traffic_type = "ALL"
-  iam_role_arn = aws_iam_role.flow_role.arn
+  iam_role_arn = aws_iam_role.es_flow_role.arn
   log_destination_type = "cloud-watch-logs"
-  log_destination = aws_cloudwatch_log_group.vpc_flow_log_group.arn
+  log_destination = aws_cloudwatch_log_group.es_vpc_flow_log_group.arn
 
 }
 
 resource "aws_security_group" "es_sg" {
-  name        = "es_sg"
-  description = "SG for ES Domain"
+  name        = "es_sg-${var.domain_name}-${random_string.random.id}"
+  description = "Security Group for ES Domain"
   vpc_id      = aws_vpc.es_vpc.id
 
   ingress {
@@ -191,7 +189,7 @@ resource "aws_elasticsearch_domain" "es_domain" {
       {
          "Effect":"Allow",
          "Principal":{
-            "AWS":"${aws_iam_role.cognito_auth_role.arn}"
+            "AWS":"${aws_iam_role.es_cognito_auth_role.arn}"
          },
          "Action":[
             "es:ESHttpGet",
@@ -206,7 +204,7 @@ resource "aws_elasticsearch_domain" "es_domain" {
       {
          "Effect":"Allow",
          "Principal":{
-            "AWS":"${aws_iam_role.firehose_role.arn}"
+            "AWS":"${aws_iam_role.es_firehose_role.arn}"
          },
          "Action":[
             "es:DescribeElasticsearchDomain",
@@ -272,7 +270,7 @@ EOF
   }
 
   depends_on = [
-    aws_cognito_user_pool_domain.main,
+    aws_cognito_user_pool_domain.es_user_pool_domain,
     aws_vpc.es_vpc
   ]
 

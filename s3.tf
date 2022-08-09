@@ -1,5 +1,5 @@
-resource "aws_s3_bucket" "access_logs_bucket" {
-  bucket = "cl-access-logs-bucket-${random_string.random.id}"
+resource "aws_s3_bucket" "es_access_logs_bucket" {
+  bucket = "access-logs-bucket-${var.domain_name}-${random_string.random.id}"
   acl = "log-delivery-write"
 
   server_side_encryption_configuration {
@@ -11,8 +11,8 @@ resource "aws_s3_bucket" "access_logs_bucket" {
   }
 }
 
-resource "aws_s3_bucket_public_access_block" "access_logs_bucket" {
-  bucket = aws_s3_bucket.access_logs_bucket.id
+resource "aws_s3_bucket_public_access_block" "es_access_logs_bucket" {
+  bucket = aws_s3_bucket.es_access_logs_bucket.id
 
   block_public_acls   = true
   block_public_policy = true
@@ -20,8 +20,8 @@ resource "aws_s3_bucket_public_access_block" "access_logs_bucket" {
   restrict_public_buckets = true
 }
 
-resource "aws_s3_bucket" "cl_bucket" {
-  bucket = "cl-bucket-${random_string.random.id}"
+resource "aws_s3_bucket" "es_bucket" {
+  bucket = "cl-bucket-${var.domain_name}-${random_string.random.id}"
 
   server_side_encryption_configuration {
     rule {
@@ -32,15 +32,15 @@ resource "aws_s3_bucket" "cl_bucket" {
   }
 }
 
-resource "aws_s3_bucket_logging" "cl_bucket_logging" {
-  bucket = aws_s3_bucket.cl_bucket.id
+resource "aws_s3_bucket_logging" "es_bucket_logging" {
+  bucket = aws_s3_bucket.es_bucket.id
 
-  target_bucket = aws_s3_bucket.access_logs_bucket.id
+  target_bucket = aws_s3_bucket.es_access_logs_bucket.id
   target_prefix = "cl-access-logs"
 }
 
-resource "aws_s3_bucket_public_access_block" "cl_bucket" {
-  bucket = aws_s3_bucket.cl_bucket.id
+resource "aws_s3_bucket_public_access_block" "es_bucket" {
+  bucket = aws_s3_bucket.es_bucket.id
 
   block_public_acls   = true
   block_public_policy = true
@@ -48,8 +48,8 @@ resource "aws_s3_bucket_public_access_block" "cl_bucket" {
   restrict_public_buckets = true
 }
 
-resource "aws_s3_bucket_policy" "cl-bucket-policy" {
-  bucket = aws_s3_bucket.access_logs_bucket.id
+resource "aws_s3_bucket_policy" "es_bucket_policy" {
+  bucket = aws_s3_bucket.es_access_logs_bucket.id
   policy =<<POLICY
 {
 	"Version": "2012-10-17",
@@ -57,15 +57,15 @@ resource "aws_s3_bucket_policy" "cl-bucket-policy" {
 	"Statement": [{
 		"Effect": "Allow",
 		"Principal": {
-			"AWS": "${aws_iam_role.firehose_role.arn}"
+			"AWS": "${aws_iam_role.es_firehose_role.arn}"
 		},
 		"Action": [
 			"s3:Put*",
 			"s3:Get*"
 		],
 		"Resource": [
-			"${aws_s3_bucket.access_logs_bucket.arn}",
-			"${aws_s3_bucket.access_logs_bucket.arn}/*"
+			"${aws_s3_bucket.es_access_logs_bucket.arn}",
+			"${aws_s3_bucket.es_access_logs_bucket.arn}/*"
 		]
 	}]
 }

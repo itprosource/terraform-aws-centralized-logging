@@ -1,5 +1,5 @@
-resource "aws_iam_role" "cl_transformer_svc_role" {
-  name = "cl_transformer_svc_role"
+resource "aws_iam_role" "es_transformer_svc_role" {
+  name = "transformer_svc_role-${var.domain_name}-${random_string.random.id}"
   managed_policy_arns = ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
 
   assume_role_policy = <<EOF
@@ -19,9 +19,9 @@ resource "aws_iam_role" "cl_transformer_svc_role" {
 EOF
 }
 
-resource "aws_iam_role_policy" "cl_transformer_svc_default_policy" {
-  name = "cl-transformer-svc-default-policy"
-  role = aws_iam_role.cl_transformer_svc_role.name
+resource "aws_iam_role_policy" "es_transformer_svc_default_policy" {
+  name = "transformer-svc-default-policy-${var.domain_name}-${random_string.random.id}"
+  role = aws_iam_role.es_transformer_svc_role.name
 
   policy = <<EOF
 {
@@ -29,7 +29,7 @@ resource "aws_iam_role_policy" "cl_transformer_svc_default_policy" {
     "Statement": [
         {
             "Action": "sqs:SendMessage",
-            "Resource": "${aws_sqs_queue.dl_queue.arn}",
+            "Resource": "${aws_sqs_queue.es_dl_queue.arn}",
             "Effect": "Allow"
         },
         {
@@ -40,7 +40,7 @@ resource "aws_iam_role_policy" "cl_transformer_svc_default_policy" {
                 "kinesis:ListShards",
                 "kinesis:SubscribeToShard"
             ],
-            "Resource": "${aws_kinesis_stream.cl_data_stream.arn}",
+            "Resource": "${aws_kinesis_stream.es_data_stream.arn}",
             "Effect": "Allow"
         },
         {
@@ -48,27 +48,27 @@ resource "aws_iam_role_policy" "cl_transformer_svc_default_policy" {
                 "kinesis:DescribeStream"
             ],
             "Effect": "Allow",
-            "Resource": "${aws_kinesis_stream.cl_data_stream.arn}"
+            "Resource": "${aws_kinesis_stream.es_data_stream.arn}"
         },
         {
             "Action": "firehose:PutRecordBatch",
             "Effect": "Allow",
-            "Resource": "${aws_kinesis_firehose_delivery_stream.cl_firehose.arn}"
+            "Resource": "${aws_kinesis_firehose_delivery_stream.es_firehose.arn}"
         }
     ]
 }
 EOF
 }
 
-resource "aws_lambda_function" "cl_transformer_lambda" {
+resource "aws_lambda_function" "es_transformer_lambda" {
 
   s3_bucket = "solutions-${data.aws_region.current.name}"
   s3_key = "centralized-logging/v4.0.1/assetb9316d9a0f47aa8516cdc62510095e3fcad7da2127a60add35eef432d3e28c30.zip"
   function_name = "ClTransformer-${random_string.random.id}"
-  role          = aws_iam_role.cl_transformer_svc_role.arn
+  role          = aws_iam_role.es_transformer_svc_role.arn
 
   dead_letter_config {
-    target_arn = "${aws_sqs_queue.dl_queue.arn}"
+    target_arn = "${aws_sqs_queue.es_dl_queue.arn}"
   }
   description = "centralized-logging - Lambda function to transform log events and send to kinesis firehose"
 
@@ -78,7 +78,7 @@ resource "aws_lambda_function" "cl_transformer_lambda" {
       SOLUTION_ID = "SO0009"
       SOLUTION_VERSION = "v4.0.1"
       #CLUSTER_SIZE = ""
-      DELIVERY_STREAM = "${aws_kinesis_firehose_delivery_stream.cl_firehose.name}"
+      DELIVERY_STREAM = "${aws_kinesis_firehose_delivery_stream.es_firehose.name}"
       CUSTOM_SDK_USER_AGENT = "AwsSolution/SO0009/v4.0.1"
     }
   }
@@ -93,36 +93,36 @@ resource "aws_lambda_function" "cl_transformer_lambda" {
   }
 
   depends_on = [
-      aws_iam_role.cl_transformer_svc_role,
-      aws_iam_role_policy.cl_transformer_svc_default_policy
+      aws_iam_role.es_transformer_svc_role,
+      aws_iam_role_policy.es_transformer_svc_default_policy
   ]
 }
 
-resource "aws_lambda_event_source_mapping" "cl_transformer_event_source" {
-  event_source_arn  = aws_kinesis_stream.cl_data_stream.arn
-  function_name     = aws_lambda_function.cl_transformer_lambda.function_name
+resource "aws_lambda_event_source_mapping" "es_transformer_event_source" {
+  event_source_arn  = aws_kinesis_stream.es_data_stream.arn
+  function_name     = aws_lambda_function.es_transformer_lambda.function_name
   batch_size = 100
   starting_position = "TRIM_HORIZON"
 }
 
-resource "aws_sns_topic" "cl_lambda_error" {
+resource "aws_sns_topic" "es_lambda_error" {
   name = "cl-lambda-error"
   kms_master_key_id = "arn:aws:kms:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:alias/aws/sns"
 }
 
-resource "aws_sns_topic_subscription" "topic_token_subscription" {
-  topic_arn = aws_sns_topic.cl_lambda_error.arn
+resource "aws_sns_topic_subscription" "es_topic_token_subscription" {
+  topic_arn = aws_sns_topic.es_lambda_error.arn
   protocol  = "email"
   endpoint  = var.admin_email
 }
 
-resource "aws_cloudwatch_metric_alarm" "cl_lambda_error_alarm" {
-  alarm_name          = "cl_lambda_error_alarm"
+resource "aws_cloudwatch_metric_alarm" "es_lambda_error_alarm" {
+  alarm_name          = "lambda_error_alarm-${var.domain_name}-${random_string.random.id}"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = "1"
-  alarm_actions       = [aws_sns_topic.cl_lambda_error.arn]
+  alarm_actions       = [aws_sns_topic.es_lambda_error.arn]
   dimensions          = {
-    FunctionName = aws_lambda_function.cl_transformer_lambda.function_name
+    FunctionName = aws_lambda_function.es_transformer_lambda.function_name
   }
   metric_name = "Errors"
   namespace   = "AWS/Lambda"
