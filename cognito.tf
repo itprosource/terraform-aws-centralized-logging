@@ -1,5 +1,5 @@
 resource "aws_cognito_user_pool" "es_user_pool_cognito" {
-  name = "es_user_pool-${random_string.random.id}"
+  name = "user_pool-${var.domain_name}-${random_string.random.id}"
 
   account_recovery_setting {
     recovery_mechanism {
@@ -13,8 +13,6 @@ resource "aws_cognito_user_pool" "es_user_pool_cognito" {
   }
 
   auto_verified_attributes = ["email"]
-  #email_verification_message = "The verification code to your new account is {####}"
-  #email_verification_subject = "Verify your new account"
 
   password_policy {
       minimum_length = 8
@@ -32,13 +30,9 @@ resource "aws_cognito_user_pool" "es_user_pool_cognito" {
     required = true
 
     string_attribute_constraints {
-      max_length =  16
-      min_length = 16
+      max_length =  48
     }
   }
-
-  #sms_verification_message = "The verification code to your new account is {####}"
-  #username_attributes = ["email"]
 
   user_pool_add_ons {
     advanced_security_mode = "ENFORCED"
@@ -52,12 +46,12 @@ resource "aws_cognito_user_pool" "es_user_pool_cognito" {
   }
 }
 
-resource "aws_cognito_user_pool_domain" "main" {
+resource "aws_cognito_user_pool_domain" "es_user_pool_domain" {
   domain       = "${var.domain_name}-${random_string.random.id}"
   user_pool_id = aws_cognito_user_pool.es_user_pool_cognito.id
 }
 
-resource "aws_cognito_user" "admin_user" {
+resource "aws_cognito_user" "es_admin_user" {
     user_pool_id = aws_cognito_user_pool.es_user_pool_cognito.id
     attributes = {
         email = var.admin_email
@@ -66,12 +60,12 @@ resource "aws_cognito_user" "admin_user" {
 }
 
 resource "aws_cognito_identity_pool" "es_identity_pool" {
-  identity_pool_name               = "cl_identity_pool-${random_string.random.id}"
+  identity_pool_name               = "identity_pool-${var.domain_name}-${random_string.random.id}"
   allow_unauthenticated_identities = false
 }
 
-resource "aws_iam_role" "cognito_auth_role" {
-  name = "cognito_auth_role"
+resource "aws_iam_role" "es_cognito_auth_role" {
+  name = "cognito_auth_role-${var.domain_name}-${random_string.random.id}"
 
   assume_role_policy = <<EOF
 {
@@ -97,19 +91,19 @@ resource "aws_iam_role" "cognito_auth_role" {
 EOF
 }
 
-resource "aws_cognito_identity_pool_roles_attachment" "main" {
+resource "aws_cognito_identity_pool_roles_attachment" "es_role_attachment" {
   identity_pool_id = aws_cognito_identity_pool.es_identity_pool.id
 
   roles = {
-    "authenticated" = aws_iam_role.cognito_auth_role.arn
+    "authenticated" = aws_iam_role.es_cognito_auth_role.arn
   }
 }
 
 resource "aws_iam_role" "es_cognito_role" {
-  name = "es_cognito_role"
+  name = "cognito_role-${var.domain_name}-${random_string.random.id}"
 
   inline_policy {
-    name = "es_cognito_access"
+    name = "cognito_access-${var.domain_name}-${random_string.random.id}"
 
     policy = jsonencode({
       Version = "2012-10-17"
@@ -151,8 +145,8 @@ resource "aws_iam_role" "es_cognito_role" {
 EOF
 }
 
-resource "aws_iam_role_policy" "cognito_role_default_policy" {
-  name = "cognito-role-default-policy"
+resource "aws_iam_role_policy" "es_cognito_role_default_policy" {
+  name = "cognito-role-default-policy-${var.domain_name}-${random_string.random.id}"
   role = aws_iam_role.es_cognito_role.name
 
   policy = <<EOF
@@ -174,9 +168,9 @@ resource "aws_iam_role_policy" "cognito_role_default_policy" {
 EOF
 }
 
-resource "aws_iam_role_policy" "auth_role_policy" {
-  name = "auth-role-policy"
-  role = aws_iam_role.cognito_auth_role.name
+resource "aws_iam_role_policy" "es_auth_role_policy" {
+  name = "auth-role-policy-${var.domain_name}-${random_string.random.id}"
+  role = aws_iam_role.es_cognito_auth_role.name
 
   policy = <<EOF
 {
