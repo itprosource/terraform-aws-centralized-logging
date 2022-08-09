@@ -68,6 +68,14 @@ resource "aws_cognito_identity_pool" "es_identity_pool" {
   allow_unauthenticated_identities = false
 }
 
+resource "aws_cognito_identity_pool_roles_attachment" "es_role_attachment" {
+  identity_pool_id = aws_cognito_identity_pool.es_identity_pool.id
+
+  roles = {
+    "authenticated" = aws_iam_role.es_cognito_auth_role.arn
+  }
+}
+
 resource "aws_iam_role" "es_cognito_auth_role" {
   name = "cognito_auth_role-${var.domain_name}-${random_string.random.id}"
 
@@ -93,14 +101,6 @@ resource "aws_iam_role" "es_cognito_auth_role" {
   ]
 }
 EOF
-}
-
-resource "aws_cognito_identity_pool_roles_attachment" "es_role_attachment" {
-  identity_pool_id = aws_cognito_identity_pool.es_identity_pool.id
-
-  roles = {
-    "authenticated" = aws_iam_role.es_cognito_auth_role.arn
-  }
 }
 
 resource "aws_iam_role" "es_cognito_role" {
