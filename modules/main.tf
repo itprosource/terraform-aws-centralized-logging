@@ -12,10 +12,10 @@ module "centralized_logging" {
 
   # Spoke accounts are given access to utilize the Cloudwatch Destination as a subscription filter.
   # Enter spoke account #s separated by a comma. Ex: "111111111111,222222222222,333333333333"
-  spoke_accounts = "590476071401"
+  spoke_accounts = "111111111111"
 
   # The initial admin login.
-  admin_email = "austin.thome1@gmail.com"
+  admin_email = "your.email@message.com"
 
   # Define the network space for the Opensearch cluster.
   es_vpc_cidr = "10.0.0.0/16"
@@ -48,9 +48,9 @@ module "centralized_logging" {
   volume_type = "gp2"
 
   # ULTRAWARM STORAGE
-  # Enables ultrawarm nodes for cost-saving data retention. Will enable hot/warm/cold storage lifecycle.
-  # If enabled,an index management policy must be deployed in Opensearch itself before lifecycling will begin.
-  warm_enabled = true
+  # Enables ultrawarm nodes for cost-saving data retention via hot/warm/cold storage lifecycle.
+  # If enabled,an index management policy must be deployed in Opensearch before lifecycling will take effect.
+  warm_enabled = false
   warm_type = "ultrawarm1.medium.elasticsearch"
   warm_count = 2
 
@@ -60,7 +60,7 @@ module "centralized_logging" {
   ephemeral_storage = 512
 
   # KINESIS DATA STREAM
-  # For modest workloads, a count of 2 to 4 will be sufficient.
+  # Shards will need to scale with expected data ingest size
   shard_count = 1
 
   # BASTION HOST
@@ -70,7 +70,7 @@ module "centralized_logging" {
 
   # Switch to create a private key for bastion access.
   # Set to TRUE to create a key and store it in Secrets Manager during creation.
-  # Set to FALSE to use an existing key, identified via bastion_key_name.
+  # Set to FALSE to use an existing key identified via bastion_key_name.
   create_private_key = true
   bastion_key_name = "es-bastion-key"
 
