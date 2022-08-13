@@ -224,7 +224,7 @@ EOF
 }
 
 resource "aws_cloudwatch_log_destination" "cw_destination" {
-  name       = "cw_destination_${random_string.random.id}"
+  name       = "cw_destination_${aws_elasticsearch_domain.es_domain.domain_name}-${random_string.random.id}"
   role_arn   = aws_iam_role.es_cw_destination_role.arn
   target_arn = aws_kinesis_stream.es_data_stream.arn
 }
