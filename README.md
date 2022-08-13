@@ -24,7 +24,7 @@ This module deploys a VPC-hosted Opensearch or Elasticsearch cluster as depicted
 
 
 ### User Management
-User accounts are managed in Cognito. Simply go to the user pool to add or remove users. 
+User accounts are managed in Cognito. Simply go to the user pool to <a href="https://docs.aws.amazon.com/cognito/latest/developerguide/how-to-create-user-accounts.html">add or remove users.</a>
 
 ### VPC Security
 The cluster is configured to allow external access only through 443 on a bastion host. It is not recommended to leave the dashboard login screen open to the public. Use the bastion host to access the dashboard. Bastion host access rules are controlled in the template. 
