@@ -1,5 +1,3 @@
-# NETWORK COMPONENTS
-
 resource "aws_cloudwatch_log_group" "es_vpc_flow_log_group" {
   name = "vpc-flow-log-group-${var.domain_name}-${random_string.random.id}"
   retention_in_days = 731
